@@ -22,6 +22,10 @@ const HomePage = () => {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [sortBy, setSortBy] = useState('id');
 
+  // --- STATI PER LA PAGINAZIONE (Aggiunta per blocchi da 10) ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // --- STATO PER IL POPUP PERSONALIZZATO ---
   const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: '', type: 'success' });
 
@@ -62,6 +66,11 @@ const HomePage = () => {
     fetchIssues();
   }, [statusFilter, priorityFilter, sortBy]);
 
+  // Reset alla pagina 1 quando cambiano i filtri o la ricerca
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, priorityFilter, sortBy]);
+
   // --- SCALA VALORI PER ORDINAMENTO PRIORITÀ ---
   const priorityWeights = {
     'Critical': 4,
@@ -70,7 +79,7 @@ const HomePage = () => {
     'Low': 1
   };
 
-  // --- MAPPATURA COLORI DINAMICI (Aggiunta per impatto visivo) ---
+  // --- MAPPATURA COLORI DINAMICI ---
   const statusColors = {
     'Open': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
     'In Progress': 'bg-[#00c2cb]/10 text-[#00c2cb] border-[#00c2cb]/20',
@@ -91,7 +100,7 @@ const HomePage = () => {
     'Low': 'text-gray-500'
   };
 
-  // Logica di ricerca e ordinamento
+  // Logica di ricerca e ordinamento complessiva
   const searchedIssues = issues
     .filter(issue => {
       const titleMatch = issue.title?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -106,6 +115,13 @@ const HomePage = () => {
       }
       return 0;
     });
+
+  // --- LOGICA DI CALCOLO DELLE PAGINE ---
+  const totalPages = Math.ceil(searchedIssues.length / itemsPerPage);
+  const paginatedIssues = searchedIssues.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Caricamento commenti
   const fetchComments = async (issueId) => {
@@ -324,23 +340,21 @@ const HomePage = () => {
                     <tbody className="divide-y divide-gray-800/50">
                       {isLoading ? (
                         <tr><td colSpan="4" className="px-8 py-10 text-center text-gray-400">Caricamento in corso da NeonDB...</td></tr>
-                      ) : searchedIssues.length > 0 ? (
-                        searchedIssues.map((issue) => (
+                      ) : paginatedIssues.length > 0 ? (
+                        paginatedIssues.map((issue) => (
                           <tr 
                             key={issue.id} 
                             onClick={() => handleIssueClick(issue)}
                             className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
                           >
-                            <td className="px-8 py-6 font-mono text-[#00c2cb] font-bold">ISS-{issue.id}</td>
+                            <td className="px-8 py-6 font-mono text-[#00c2cb] font-bold whitespace-nowrap">ISS-{issue.id}</td>
                             <td className="px-8 py-6 font-bold text-gray-200 group-hover:text-white transition-colors">{issue.title}</td>
                             <td className="px-8 py-6">
-                              {/* Stato con colore dinamico */}
-                              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border ${statusColors[issue.status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border whitespace-nowrap ${statusColors[issue.status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                                 {issue.status}
                               </span>
                             </td>
                             <td className="px-8 py-6">
-                              {/* Pallino priorità con colore dinamico */}
                               <span className={`text-sm font-bold ${priorityDotColors[issue.priority] || 'text-gray-300'}`}>
                                 ● <span className="text-gray-300">{issue.priority}</span>
                               </span>
@@ -357,6 +371,31 @@ const HomePage = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {/* --- CONTROLLI DI PAGINAZIONE INTERNI AL LAYOUT --- */}
+                {totalPages > 1 && (
+                  <div className="flex justify-between items-center mt-6 px-4">
+                    <p className="text-xs text-gray-500 font-medium font-mono uppercase tracking-wider">
+                      Pagina {currentPage} di {totalPages}
+                    </p>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-[#323235] hover:bg-gray-700 disabled:opacity-30 text-white font-black uppercase text-[10px] tracking-widest rounded-xl transition-all transform active:scale-95"
+                      >
+                        ← Prev
+                      </button>
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 bg-[#6495ED] text-[#1a1a1c] hover:bg-[#5a86d6] disabled:opacity-30 font-black uppercase text-[10px] tracking-widest rounded-xl transition-all transform active:scale-95"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
