@@ -62,12 +62,50 @@ const HomePage = () => {
     fetchIssues();
   }, [statusFilter, priorityFilter, sortBy]);
 
-  // Logica di ricerca
-  const searchedIssues = issues.filter(issue => {
-    const titleMatch = issue.title?.toLowerCase().includes(searchTerm.toLowerCase());
-    const descMatch = issue.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    return titleMatch || descMatch;
-  });
+  // --- SCALA VALORI PER ORDINAMENTO PRIORITÀ ---
+  const priorityWeights = {
+    'Critical': 4,
+    'High': 3,
+    'Medium': 2,
+    'Low': 1
+  };
+
+  // --- MAPPATURA COLORI DINAMICI (Aggiunta per impatto visivo) ---
+  const statusColors = {
+    'Open': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    'In Progress': 'bg-[#00c2cb]/10 text-[#00c2cb] border-[#00c2cb]/20',
+    'Closed': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+  };
+
+  const typeColors = {
+    'bug': 'bg-red-500/10 text-red-500 border-red-500/20',
+    'feature': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    'documentation': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    'question': 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+  };
+
+  const priorityDotColors = {
+    'Critical': 'text-red-500',
+    'High': 'text-orange-500',
+    'Medium': 'text-yellow-500',
+    'Low': 'text-gray-500'
+  };
+
+  // Logica di ricerca e ordinamento
+  const searchedIssues = issues
+    .filter(issue => {
+      const titleMatch = issue.title?.toLowerCase().includes(searchTerm.toLowerCase());
+      const descMatch = issue.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      return titleMatch || descMatch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'priority') {
+        const weightA = priorityWeights[a.priority] || 0;
+        const weightB = priorityWeights[b.priority] || 0;
+        return weightB - weightA;
+      }
+      return 0;
+    });
 
   // Caricamento commenti
   const fetchComments = async (issueId) => {
@@ -296,12 +334,16 @@ const HomePage = () => {
                             <td className="px-8 py-6 font-mono text-[#00c2cb] font-bold">ISS-{issue.id}</td>
                             <td className="px-8 py-6 font-bold text-gray-200 group-hover:text-white transition-colors">{issue.title}</td>
                             <td className="px-8 py-6">
-                              <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                              {/* Stato con colore dinamico */}
+                              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border ${statusColors[issue.status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                                 {issue.status}
                               </span>
                             </td>
                             <td className="px-8 py-6">
-                              <span className="text-sm font-bold text-gray-300">● {issue.priority}</span>
+                              {/* Pallino priorità con colore dinamico */}
+                              <span className={`text-sm font-bold ${priorityDotColors[issue.priority] || 'text-gray-300'}`}>
+                                ● <span className="text-gray-300">{issue.priority}</span>
+                              </span>
                             </td>
                           </tr>
                         ))
@@ -386,7 +428,18 @@ const HomePage = () => {
                     <div>
                       <span className="font-mono text-[#00c2cb] font-bold text-lg">ISS-{selectedIssue.id}</span>
                       <h2 className="text-2xl md:text-3xl font-black text-white uppercase mt-1">{selectedIssue.title}</h2>
-                      <p className="text-xs text-gray-500 mt-1">Categoria: {selectedIssue.type} | Priorità: {selectedIssue.priority}</p>
+                      
+                      {/* Categoria e priorità con badge grafici incorporati nel testo */}
+                      <p className="text-xs text-gray-500 mt-2 flex items-center flex-wrap gap-2">
+                        Categoria: 
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${typeColors[selectedIssue.type] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                          {selectedIssue.type}
+                        </span>
+                        | Priorità: 
+                        <span className={`font-bold ${priorityDotColors[selectedIssue.priority] || 'text-gray-300'}`}>
+                          {selectedIssue.priority}
+                        </span>
+                      </p>
                     </div>
                     
                     <div>
