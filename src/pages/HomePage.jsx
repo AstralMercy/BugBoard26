@@ -22,9 +22,9 @@ const HomePage = () => {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [sortBy, setSortBy] = useState('id');
 
-  // --- STATI PER LA PAGINAZIONE (Aggiunta per blocchi da 10) ---
+  // --- STATI PER LA PAGINAZIONE (Modificata a blocchi da 5 elementi) ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   // --- STATO PER IL POPUP PERSONALIZZATO ---
   const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: '', type: 'success' });
@@ -372,7 +372,7 @@ const HomePage = () => {
                   </table>
                 </div>
 
-                {/* --- CONTROLLI DI PAGINAZIONE INTERNI AL LAYOUT --- */}
+                {/* --- CONTROLLI DI PAGINAZIONE --- */}
                 {totalPages > 1 && (
                   <div className="flex justify-between items-center mt-6 px-4">
                     <p className="text-xs text-gray-500 font-medium font-mono uppercase tracking-wider">
