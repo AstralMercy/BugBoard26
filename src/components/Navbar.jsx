@@ -26,12 +26,13 @@ const Navbar = ({ isLoggedIn, userName }) => {
   };
 
   return (
-    <nav className="bg-[#2a2a2d] border-b border-gray-800 px-6 py-4 flex justify-between items-center h-24 shrink-0 shadow-md">
+    /* RIDOTTA ALTEZZA A h-16 E PADDING VERTICALE A py-3 */
+    <nav className="bg-[#2a2a2d] border-b border-gray-800 px-6 py-3 flex justify-between items-center h-16 shrink-0 shadow-md">
       
       {/* BRAND LOGO */}
       <div className="flex items-center gap-3">
-        <div className="w-3 h-3 bg-[#00c2cb] rounded-full animate-pulse"></div>
-        <span className="text-xl font-black uppercase tracking-widest italic text-white">
+        <div className="w-2.5 h-2.5 bg-[#00c2cb] rounded-full animate-pulse"></div>
+        <span className="text-lg font-black uppercase tracking-widest italic text-white">
           BugBoard<span className="text-[#00c2cb]">26</span>
         </span>
       </div>
@@ -42,25 +43,25 @@ const Navbar = ({ isLoggedIn, userName }) => {
           
           {/* Dettagli testuali dell'utente (Invisibili su smartphone piccoli) */}
           <div className="hidden sm:flex flex-col text-right">
-            <span className="text-sm font-bold text-white">
+            <span className="text-xs font-bold text-white">
               {loggedUser.nome && loggedUser.cognome 
                 ? `${loggedUser.nome} ${loggedUser.cognome}` 
                 : userName}
             </span>
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#00c2cb]">
+            <span className="text-[9px] font-black uppercase tracking-wider text-[#00c2cb]">
               {loggedUser.role === 'admin' ? '🛡️ Admin' : '💻 Developer'}
             </span>
           </div>
 
-          {/* CERCHIO DINAMICO CON INIZIALI RIGIDE */}
-          <div className="w-12 h-12 rounded-full bg-[#6495ED] text-[#1a1a1c] flex items-center justify-center font-black text-sm border border-gray-700/50 shadow-lg select-none tracking-tighter">
+          {/* CERCHIO DINAMICO OTTIMIZZATO A w-10 h-10 PER IL NUOVO LAYOUT COMPATTO */}
+          <div className="w-10 h-10 rounded-full bg-[#6495ED] text-[#1a1a1c] flex items-center justify-center font-black text-xs border border-gray-700/50 shadow-lg select-none tracking-tighter">
             {getInitials()}
           </div>
 
-          {/* PULSANTE LOGOUT */}
+          {/* PULSANTE LOGOUT SNELLIRO CON PY-2 E PX-3 */}
           <button 
             onClick={handleLogout}
-            className="ml-2 text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-500 transition-colors bg-red-500/10 hover:bg-red-500/20 px-4 py-2.5 rounded-xl border border-red-500/20"
+            className="ml-2 text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-500 transition-colors bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-xl border border-red-500/20"
           >
             Logout
           </button>

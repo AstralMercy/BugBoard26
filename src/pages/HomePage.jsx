@@ -219,7 +219,7 @@ const HomePage = () => {
     <div className="min-h-screen bg-[#1a1a1c] text-white flex flex-col overflow-hidden">
       <Navbar isLoggedIn={true} userName={loggedUser.username} />
 
-      <div className="flex flex-1 flex-col md:flex-row h-screen md:h-[calc(100vh-6rem)]">
+      <div className="flex flex-1 flex-col md:flex-row h-screen md:h-[calc(100vh-4rem)]">
         
         {/* SIDEBAR */}
         <aside className="w-full md:w-72 bg-[#2a2a2d] border-t md:border-t-0 md:border-r border-gray-800 p-6 flex md:flex-col shadow-xl order-2 md:order-1 overflow-x-auto md:overflow-x-hidden shrink-0">
@@ -502,7 +502,7 @@ const HomePage = () => {
                   )}
 
                   <div className="border-t border-gray-800 pt-8">
-                    <h3 className="text-lg font-black uppercase tracking-wider mb-6 text-[#00c2cb]">Discussione / Commenti (Punto 5)</h3>
+                    <h3 className="text-lg font-black uppercase tracking-wider mb-6 text-[#00c2cb]">Discussione / Commenti</h3>
                     
                     <div className="space-y-4 mb-6">
                       {comments.length > 0 ? (
