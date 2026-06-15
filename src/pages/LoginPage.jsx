@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import CustomAlert from '../components/CustomAlert'; // Inserito solo l'import
 
 const LoginPage = () => {
   // --- LOGICA JAVASCRIPT ---
@@ -10,6 +11,13 @@ const LoginPage = () => {
   });
 
   const navigate = useNavigate();
+
+  // --- STATO PER IL POPUP PERSONALIZZATO ---
+  const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: '', type: 'success' });
+
+  const triggerAlert = (message, type = 'success') => {
+    setAlertConfig({ isOpen: true, message, type });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +31,8 @@ const LoginPage = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      // Nota il percorso aggiornato /api/auth/login coerente con Express
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,17 +43,20 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Salviamo il token di sessione (Utile per i punti 1, 5, 6 della traccia)
+        // Salviamo il Token JWT e le info utente nella memoria del browser
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Entra direttamente senza mostrare il popup di successo
         navigate('/home'); 
       } else {
-        alert("Errore di autenticazione: " + data.message);
+        // Mostra il popup personalizzato in caso di errore di credenziali
+        triggerAlert("Errore di autenticazione: " + data.message, 'error');
       }
     } catch (error) {
       console.error("Errore connessione server:", error);
-      // Fallback per i test locali grafici
-      alert("Connessione simulata alla dashboard (Express non attivo).");
-      navigate('/home');
+      // Mostra il popup personalizzato in caso di errore di rete
+      triggerAlert("Impossibile connettersi al backend. Assicurati che Express sia acceso sulla porta 5000.", 'error');
     }
   };
 
@@ -127,6 +139,14 @@ const LoginPage = () => {
       
       {/* Piccolo spazio vuoto inferiore per bilanciare il flex-grow */}
       <div className="h-4"></div>
+
+      {/* COMPONENTE ALERT INSERITO SENZA TOCCARE IL DESIGN ORIGINALE */}
+      <CustomAlert 
+        isOpen={alertConfig.isOpen} 
+        message={alertConfig.message} 
+        type={alertConfig.type} 
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })} 
+      />
     </div>
   );
 };

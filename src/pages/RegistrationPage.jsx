@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import CustomAlert from '../components/CustomAlert'; // Inserito solo l'import
 
 const RegistrationPage = () => {
-  // --- LOGICA JAVASCRIPT (Invariata per garantire il perfetto funzionamento) ---
+  // --- LOGICA JAVASCRIPT ---
   const [formData, setFormData] = useState({
     nome: '',
     cognome: '',
@@ -13,6 +14,13 @@ const RegistrationPage = () => {
   });
 
   const navigate = useNavigate();
+
+  // --- STATO PER IL POPUP PERSONALIZZATO ---
+  const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: '', type: 'success' });
+
+  const triggerAlert = (message, type = 'success') => {
+    setAlertConfig({ isOpen: true, message, type });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,7 +34,8 @@ const RegistrationPage = () => {
     e.preventDefault(); 
     
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      // Nota il percorso aggiornato /api/auth/register
+      const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,14 +46,14 @@ const RegistrationPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Registrazione avvenuta con successo!");
-        navigate('/login'); 
+        triggerAlert("Registrazione avvenuta con successo! Ora puoi effettuare l'accesso.", 'success'); // Sostituito alert
+        setTimeout(() => navigate('/login'), 1500); // Mandiamo al login dopo un piccolo delay per mostrare il popup
       } else {
-        alert("Errore dal server: " + data.message);
+        triggerAlert("Errore dal server: " + data.message, 'error'); // Sostituito alert
       }
     } catch (error) {
       console.error("Errore di connessione:", error);
-      alert("Impossibile connettersi al server. Assicurati che Express sia attivo.");
+      triggerAlert("Impossibile connettersi al server. Assicurati che Express sia attivo.", 'error'); // Sostituito alert
     }
   };
 
@@ -178,6 +187,14 @@ const RegistrationPage = () => {
 
         </div>
       </main>
+
+      {/* COMPONENTE ALERT INSERITO CORRETTAMENTE IN FONDO */}
+      <CustomAlert 
+        isOpen={alertConfig.isOpen} 
+        message={alertConfig.message} 
+        type={alertConfig.type} 
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })} 
+      />
     </div>
   );
 };
