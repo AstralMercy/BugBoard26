@@ -359,7 +359,15 @@ const HomePage = () => {
                             className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
                           >
                             <td className="px-8 py-6 font-mono text-[#00c2cb] font-bold whitespace-nowrap">ISS-{issue.id}</td>
-                            <td className="px-8 py-6 font-bold text-gray-200 group-hover:text-white transition-colors">{issue.title}</td>
+                            
+                            {/* --- MODIFICATO: Mostra il titolo e sotto l'autore della segnalazione --- */}
+                            <td className="px-8 py-6 font-bold text-gray-200 group-hover:text-white transition-colors">
+                              <div>{issue.title}</div>
+                              <div className="text-[10px] text-gray-500 font-medium mt-1 uppercase tracking-wider">
+                                Segnalato da: <span className="text-gray-400 font-bold">@{issue.author || 'Ospite'}</span>
+                              </div>
+                            </td>
+                            
                             <td className="px-8 py-6">
                               <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border whitespace-nowrap ${statusColors[issue.status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                                 {issue.status}
@@ -479,7 +487,7 @@ const HomePage = () => {
                       <span className="font-mono text-[#00c2cb] font-bold text-lg">ISS-{selectedIssue.id}</span>
                       <h2 className="text-2xl md:text-3xl font-black text-white uppercase mt-1">{selectedIssue.title}</h2>
                       
-                      {/* Categoria e priorità con badge grafici incorporati nel testo */}
+                      {/* Categoria, priorità e autore con badge grafici incorporati nel testo */}
                       <p className="text-xs text-gray-500 mt-2 flex items-center flex-wrap gap-2">
                         Categoria: 
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${typeColors[selectedIssue.type] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
@@ -489,6 +497,8 @@ const HomePage = () => {
                         <span className={`font-bold ${priorityDotColors[selectedIssue.priority] || 'text-gray-300'}`}>
                           {selectedIssue.priority}
                         </span>
+                        {/* --- AGGIUNTO: Autore nel dettaglio --- */}
+                        | Creato da: <span className="text-[#6495ED] font-bold uppercase tracking-wider">@{selectedIssue.author || 'Ospite'}</span>
                       </p>
                     </div>
                     

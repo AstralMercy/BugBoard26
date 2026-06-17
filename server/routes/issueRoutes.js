@@ -14,7 +14,6 @@ cloudinary.config({
 });
 
 // Usiamo la memoria RAM (memoryStorage) anziché il disco locale per i file temporanei
-// In questo modo il server rimane leggerissimo e non accumula immagini locali
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -41,9 +40,12 @@ router.post('/', verifyToken, upload.single('image'), async (req, res) => {
       imagePath = uploadResult.secure_url;
     }
 
+    // --- AGGIORNATO: Recuperiamo l'autore dal token e lo salviamo nella tabella ---
+    const author = req.user.username;
+
     const result = await query(
-      'INSERT INTO issues (title, description, type, priority, image_path, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [title, description, type, priority, imagePath, 'Open']
+      'INSERT INTO issues (title, description, type, priority, image_path, status, author) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [title, description, type, priority, imagePath, 'Open', author]
     );
     return res.status(201).json(result.rows[0]);
   } catch (error) {
