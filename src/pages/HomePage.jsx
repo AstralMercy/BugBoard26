@@ -86,11 +86,12 @@ const HomePage = () => {
     'Closed': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
   };
 
+  // AGGIORNATO: Rimosso sfondo e bordo, lasciando solo il colore del testo
   const typeColors = {
-    'bug': 'bg-red-500/10 text-red-500 border-red-500/20',
-    'feature': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    'documentation': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-    'question': 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+    'bug': 'text-red-500',
+    'feature': 'text-purple-400',
+    'documentation': 'text-indigo-400',
+    'question': 'text-gray-400'
   };
 
   const priorityDotColors = {
@@ -269,7 +270,7 @@ const HomePage = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
                   <div>
                     <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Issues</h1>
-                    <p className="text-gray-500 mt-2 font-medium">Dati reali sincronizzati con NeonDB Cloud</p>
+                    <p className="text-gray-500 mt-2 font-medium">Gestisci e monitora i tuoi bug</p>
                   </div>
                   <Link to="/create-issue" className="w-full sm:w-auto">
                     <button className="w-full sm:w-auto bg-[#6495ED] hover:bg-[#5a86d6] text-[#1a1a1c] px-8 py-4 rounded-xl font-black uppercase text-sm tracking-widest shadow-lg transition-all transform active:scale-95">
@@ -281,7 +282,11 @@ const HomePage = () => {
                 {/* BARRA DI RICERCA REATTIVA */}
                 <div className="mb-4">
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 font-bold">🔍</span>
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </div>
                     <input 
                       type="text"
                       value={searchTerm}
@@ -350,7 +355,7 @@ const HomePage = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-800/50">
                       {isLoading ? (
-                        <tr><td colSpan="4" className="px-8 py-10 text-center text-gray-400">Caricamento in corso da NeonDB...</td></tr>
+                        <tr><td colSpan="4" className="px-8 py-10 text-center text-gray-400">Caricamento in corso</td></tr>
                       ) : paginatedIssues.length > 0 ? (
                         paginatedIssues.map((issue) => (
                           <tr 
@@ -360,7 +365,6 @@ const HomePage = () => {
                           >
                             <td className="px-8 py-6 font-mono text-[#00c2cb] font-bold whitespace-nowrap">ISS-{issue.id}</td>
                             
-                            {/* --- MODIFICATO: Mostra il titolo e sotto l'autore della segnalazione --- */}
                             <td className="px-8 py-6 font-bold text-gray-200 group-hover:text-white transition-colors">
                               <div>{issue.title}</div>
                               <div className="text-[10px] text-gray-500 font-medium mt-1 uppercase tracking-wider">
@@ -423,7 +427,7 @@ const HomePage = () => {
               <div>
                 <div className="mb-10">
                   <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Gestione Utenze</h1>
-                  <p className="text-gray-500 mt-2 font-medium">Scrittura diretta sulla tabella 'users' di NeonDB</p>
+                  <p className="text-gray-500 mt-2 font-medium">Salvataggio nuovo account dipendente</p>
                 </div>
                 
                 <div className="bg-[#2a2a2d] p-6 md:p-12 rounded-[2.5rem] border border-gray-800 max-w-3xl shadow-2xl">
@@ -467,7 +471,7 @@ const HomePage = () => {
                     </div>
 
                     <button type="submit" className="w-full py-4 bg-[#6495ED] hover:bg-[#5a86d6] text-[#1a1a1c] font-black uppercase text-sm tracking-widest rounded-xl shadow-lg transition-all transform active:scale-95 mt-4">
-                      Registra Nuovo Utente su NeonDB
+                      Registra Nuovo Utente
                     </button>
                   </form>
                 </div>
@@ -487,17 +491,16 @@ const HomePage = () => {
                       <span className="font-mono text-[#00c2cb] font-bold text-lg">ISS-{selectedIssue.id}</span>
                       <h2 className="text-2xl md:text-3xl font-black text-white uppercase mt-1">{selectedIssue.title}</h2>
                       
-                      {/* Categoria, priorità e autore con badge grafici incorporati nel testo */}
+                      {/* AGGIORNATO: Rimosso classi container, border e padding dallo span della categoria */}
                       <p className="text-xs text-gray-500 mt-2 flex items-center flex-wrap gap-2">
                         Categoria: 
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${typeColors[selectedIssue.type] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                        <span className={`font-bold uppercase ${typeColors[selectedIssue.type] || 'text-gray-400'}`}>
                           {selectedIssue.type}
                         </span>
                         | Priorità: 
                         <span className={`font-bold ${priorityDotColors[selectedIssue.priority] || 'text-gray-300'}`}>
                           {selectedIssue.priority}
                         </span>
-                        {/* --- AGGIUNTO: Autore nel dettaglio --- */}
                         | Creato da: <span className="text-[#6495ED] font-bold uppercase tracking-wider">@{selectedIssue.author || 'Ospite'}</span>
                       </p>
                     </div>
@@ -514,7 +517,6 @@ const HomePage = () => {
 
                   <p className="text-gray-300 font-medium leading-relaxed mb-8">{selectedIssue.description}</p>
 
-                  {/* Visualizzazione dell'allegato da Cloudinary URL */}
                   {selectedIssue.image_path && (
                     <div className="mb-8">
                       <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Allegato screenshot:</p>
@@ -534,7 +536,7 @@ const HomePage = () => {
                           </div>
                         ))
                       ) : (
-                        <p className="text-sm text-gray-500 italic">Nessun commento presente. Scrivi il primo aggiornamento per questo bug!</p>
+                        <p className="text-sm text-gray-500 italic">Nessun commento presente.</p>
                       )}
                     </div>
 
