@@ -179,7 +179,18 @@ const HomePage = () => {
       if (response.ok) {
         setSelectedIssue({ ...selectedIssue, status: newStatus });
         fetchIssues();
-        triggerAlert("Stato aggiornato su NeonDB!", 'success');
+        
+        // --- LOGICA DI NOTIFICA REQUISITO 6 PULITA ---
+        if (newStatus === 'Closed') {
+          triggerAlert(
+            "Issue risolta. Notifica di chiusura inviata all'utente segnalatore.", 
+            'success'
+          );
+        } else {
+          triggerAlert("Stato aggiornato correttamente.", 'success');
+        }
+        // ---------------------------------------------
+        
       }
     } catch (error) {
       triggerAlert("Errore durante l'aggiornamento dello stato.", 'error');
