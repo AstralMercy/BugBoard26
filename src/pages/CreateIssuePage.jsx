@@ -71,7 +71,7 @@ const CreateIssuePage = () => {
       });
 
       if (response.ok) {
-        triggerAlert("Bug segnalato e salvato correttamente su NeonDB!", 'success'); // Sostituito alert
+        triggerAlert("Bug segnalato e salvato correttamente", 'success'); // Sostituito alert
         setTimeout(() => navigate('/home'), 1500); // Ritorniamo alla dashboard con un piccolo delay per far vedere il popup
       } else {
         const errorData = await response.json();
@@ -160,7 +160,7 @@ const CreateIssuePage = () => {
               {/* DESCRIZIONE DETTAGLIATA */}
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">
-                  Descrizione Dettagliata e Passi per Riprodurlo
+                  Descrizione Dettagliata
                 </label>
                 <textarea 
                   required
@@ -198,7 +198,7 @@ const CreateIssuePage = () => {
                 disabled={isSubmitting}
                 className="w-full py-4 bg-[#6495ED] hover:bg-[#5a86d6] text-[#1a1a1c] font-black uppercase text-sm tracking-widest rounded-xl shadow-lg disabled:opacity-50 transition-all"
               >
-                {isSubmitting ? "Salvataggio su NeonDB in corso..." : "Invia Segnalazione a NeonDB"}
+                {isSubmitting ? "Salvataggio della segnalazione in corso..." : "Invia Segnalazione"}
               </button>
 
             </form>
