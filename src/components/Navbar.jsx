@@ -29,9 +29,8 @@ const Navbar = ({ isLoggedIn, userName }) => {
     /* RIDOTTA ALTEZZA A h-16 E PADDING VERTICALE A py-3 */
     <nav className="bg-[#2a2a2d] border-b border-gray-800 px-6 py-3 flex justify-between items-center h-16 shrink-0 shadow-md">
       
-      {/* BRAND LOGO */}
+      {/* BRAND LOGO (Pallino rimosso) */}
       <div className="flex items-center gap-3">
-        <div className="w-2.5 h-2.5 bg-[#00c2cb] rounded-full animate-pulse"></div>
         <span className="text-lg font-black uppercase tracking-widest italic text-white">
           BugBoard<span className="text-[#00c2cb]">26</span>
         </span>
