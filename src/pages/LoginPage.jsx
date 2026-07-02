@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import CustomAlert from '../components/CustomAlert';
+import CustomAlert from '../components/CustomAlert'; // Inserito solo l'import
 
 const LoginPage = () => {
   // --- LOGICA JAVASCRIPT ---
@@ -31,6 +31,7 @@ const LoginPage = () => {
     e.preventDefault();
     
     try {
+      // Nota il percorso aggiornato /api/auth/login coerente con Express
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
@@ -42,24 +43,19 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Ho convertito la regex in una stringa esplicita così non rischia di rompere la sintassi JSX
-        const jwtRegex = new RegExp('^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+=]*$');
+        // Salviamo il Token JWT e le info utente nella memoria del browser
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         
-        const isTokenSafe = typeof data.token === 'string' && jwtRegex.test(data.token);
-        const isUserSafe = data.user && typeof data.user === 'object';
-
-        if (isTokenSafe && isUserSafe) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          navigate('/home'); 
-        } else {
-          triggerAlert("Errore di sicurezza: i dati ricevuti dal server sono corrotti o non validi.", 'error');
-        }
+        // Entra direttamente senza mostrare il popup di successo
+        navigate('/home'); 
       } else {
+        // Mostra il popup personalizzato in caso di errore di credenziali
         triggerAlert("Errore di autenticazione: " + data.message, 'error');
       }
     } catch (error) {
       console.error("Errore connessione server:", error);
+      // Mostra il popup personalizzato in caso di errore di rete
       triggerAlert("Impossibile connettersi al backend. Assicurati che Express sia acceso sulla porta 5000.", 'error');
     }
   };
