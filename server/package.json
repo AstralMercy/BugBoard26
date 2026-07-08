@@ -4,7 +4,10 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "test": "npm run test:unit",
+    "test:unit": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
+    "test:unit:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --runInBand"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,6 +20,8 @@
     "pg": "^8.11.5"
   },
   "devDependencies": {
+    "jest": "^30.4.2",
+    "jest-junit": "^17.0.0",
     "nodemon": "^3.1.0"
   }
 }
