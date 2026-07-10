@@ -6,20 +6,19 @@ import {
   validateIssuePayload,
 } from '../utils/tests.js';
 
-const TITLE_ERROR = 'Il titolo deve contenere da 5 a 100 caratteri.';
+const TITLE_ERROR = 'Il titolo non può essere vuoto.';
 const DESCRIPTION_ERROR = 'La descrizione non può essere vuota.';
 const TYPE_ERROR = 'Il tipo della issue non è valido.';
 const PRIORITY_ERROR = 'La priorità della issue non è valida.';
 const COMMENT_EMPTY_ERROR = 'Il commento non può essere vuoto.';
-const COMMENT_LENGTH_ERROR = 'Il commento non può superare 1000 caratteri.';
 const ISSUE_ID_ERROR = "L'identificativo della issue deve essere un intero positivo.";
 
 describe('validateIssuePayload', () => {
   test.each([
-    ['accetta il titolo al limite minimo', 'abcde', 'Descrizione valida', 'bug', 'Low', true, []],
-    ['accetta il titolo al limite massimo', 'a'.repeat(100), 'Descrizione valida', 'feature', 'Critical', true, []],
-    ['rifiuta un titolo di quattro caratteri', 'abcd', 'Descrizione valida', 'bug', 'High', false, [TITLE_ERROR]],
-    ['rifiuta un titolo di 101 caratteri', 'a'.repeat(101), 'Descrizione valida', 'bug', 'High', false, [TITLE_ERROR]],
+    ['accetta un titolo di un solo carattere', 'a', 'Descrizione valida', 'bug', 'Low', true, []],
+    ['accetta un titolo molto lungo', 'a'.repeat(1000), 'Descrizione valida', 'feature', 'Critical', true, []],
+    ['rifiuta un titolo vuoto', '', 'Descrizione valida', 'bug', 'High', false, [TITLE_ERROR]],
+    ['rifiuta un titolo composto da soli spazi', '   ', 'Descrizione valida', 'bug', 'High', false, [TITLE_ERROR]],
     ['rifiuta una descrizione composta da spazi', 'Titolo valido', '   ', 'bug', 'Medium', false, [DESCRIPTION_ERROR]],
     ['rifiuta una tipologia non prevista', 'Titolo valido', 'Descrizione valida', 'task', 'Low', false, [TYPE_ERROR]],
     ['rifiuta una priorità con valore non previsto', 'Titolo valido', 'Descrizione valida', 'feature', 'Urgent', false, [PRIORITY_ERROR]],
@@ -107,9 +106,9 @@ describe('filterIssues', () => {
 describe('validateCommentPayload', () => {
   test.each([
     ['accetta un commento ordinario associato a una issue valida', 'Fix in revisione.', 1, true, []],
-    ['accetta il testo al limite massimo', 'a'.repeat(1000), 42, true, []],
+    ['accetta un commento di un solo carattere', 'a', 42, true, []],
+    ['accetta un commento superiore a 1000 caratteri', 'a'.repeat(1001), 3, true, []],
     ['rifiuta un commento composto da soli spazi', '   ', 3, false, [COMMENT_EMPTY_ERROR]],
-    ['rifiuta un commento di 1001 caratteri', 'a'.repeat(1001), 3, false, [COMMENT_LENGTH_ERROR]],
     ['rifiuta un identificativo uguale a zero', 'Commento valido', 0, false, [ISSUE_ID_ERROR]],
     ['rifiuta un identificativo non intero', 'Commento valido', 1.5, false, [ISSUE_ID_ERROR]],
     [
