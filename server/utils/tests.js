@@ -23,8 +23,8 @@ export function validateIssuePayload(title, description, type, priority) {
   const normalizedTitle = typeof title === 'string' ? title.trim() : '';
   const normalizedDescription = typeof description === 'string' ? description.trim() : '';
 
-  if (normalizedTitle.length < 5 || normalizedTitle.length > 100) {
-    errors.push('Il titolo deve contenere da 5 a 100 caratteri.');
+  if (normalizedTitle.length === 0) {
+    errors.push('Il titolo non può essere vuoto.');
   }
 
   if (normalizedDescription.length === 0) {
@@ -96,10 +96,6 @@ export function validateCommentPayload(text, issueId) {
 
   if (normalizedText.length === 0) {
     errors.push('Il commento non può essere vuoto.');
-  }
-
-  if (normalizedText.length > 1000) {
-    errors.push('Il commento non può superare 1000 caratteri.');
   }
 
   if (!Number.isInteger(issueId) || issueId <= 0) {
