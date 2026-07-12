@@ -3,15 +3,14 @@ import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { query } from '../data/db.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
+import { CLOUDINARY_CONFIG } from '../config/env.js';
 
 const router = express.Router();
+const INITIAL_ISSUE_STATUS = 'to-do';
+const ALLOWED_ISSUE_STATUSES = new Set(['to-do', 'In Progress', 'Closed', 'Resolved']);
 
 // Configurazione di Cloudinary tramite le credenziali del file .env
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+cloudinary.config(CLOUDINARY_CONFIG);
 
 // Usiamo la memoria RAM (memoryStorage) anziché il disco locale per i file temporanei
 const storage = multer.memoryStorage();
@@ -45,7 +44,7 @@ router.post('/', verifyToken, upload.single('image'), async (req, res) => {
 
     const result = await query(
       'INSERT INTO issues (title, description, type, priority, image_path, status, author) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [title, description, type, priority, imagePath, 'Open', author]
+      [title, description, type, priority, imagePath, INITIAL_ISSUE_STATUS, author]
     );
     return res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -97,6 +96,9 @@ router.put('/:id/status', verifyToken, async (req, res) => {
   const { status } = req.body;
 
   if (!status) return res.status(400).json({ message: "Stato mancante." });
+  if (!ALLOWED_ISSUE_STATUSES.has(status)) {
+    return res.status(400).json({ message: "Stato non valido." });
+  }
 
   try {
     await query('UPDATE issues SET status = $1 WHERE id = $2', [status, id]);
@@ -113,7 +115,7 @@ router.get('/:id/comments', verifyToken, async (req, res) => {
   try {
     const result = await query('SELECT * FROM comments WHERE issue_id = $1 ORDER BY created_at ASC', [id]);
     return res.json(result.rows);
-  } catch (error) {
+  } catch {
     return res.status(500).json({ message: "Errore nel caricamento della chat." });
   }
 });
