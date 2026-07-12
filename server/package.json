@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": "20 || >=22"
+  },
   "scripts": {
     "dev": "nodemon server.js",
+    "db:migrate:todo": "node scripts/migrate-status-to-todo.js",
     "test": "npm run test:unit",
     "test:unit": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "test:unit:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --runInBand"
@@ -16,12 +20,17 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.2.0",
     "pg": "^8.11.5"
   },
   "devDependencies": {
     "jest": "^30.4.2",
     "jest-junit": "^17.0.0",
     "nodemon": "^3.1.0"
+  },
+  "overrides": {
+    "babel-plugin-istanbul": "8.0.0",
+    "glob": "13.0.6",
+    "test-exclude": "8.0.0"
   }
 }
