@@ -3,7 +3,7 @@ const ISSUE_PRIORITIES = new Set(['Low', 'Medium', 'High', 'Critical']);
 const TERMINAL_STATUSES = new Set(['Closed', 'Resolved']);
 
 const STATUS_TRANSITIONS = new Map([
-  ['Open', new Set(['In Progress', 'Closed', 'Resolved'])],
+  ['to-do', new Set(['In Progress', 'Closed', 'Resolved'])],
   ['In Progress', new Set(['Closed', 'Resolved'])],
   ['Closed', new Set(['Resolved'])],
   ['Resolved', new Set()],
