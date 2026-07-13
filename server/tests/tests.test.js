@@ -51,7 +51,7 @@ describe('filterIssues', () => {
       id: 1,
       title: 'Errore salvataggio profilo',
       description: 'La richiesta restituisce errore 500',
-      status: 'Open',
+      status: 'to-do',
       priority: 'High',
     },
     {
@@ -72,7 +72,7 @@ describe('filterIssues', () => {
       id: 4,
       title: 'Aggiornare il tema',
       description: 'Migliorare il contrasto della dashboard',
-      status: 'Open',
+      status: 'to-do',
       priority: 'Low',
     },
   ];
@@ -81,20 +81,20 @@ describe('filterIssues', () => {
     ['restituisce tutte le issue senza filtri', issues, {}, [1, 2, 3, 4]],
     ['ricerca nel titolo senza distinguere maiuscole e minuscole', issues, { search: 'ERRORE' }, [1]],
     ['ricerca anche nella descrizione', issues, { search: 'profilo' }, [1, 3]],
-    ['filtra per stato con uguaglianza esatta', issues, { status: 'Open' }, [1, 4]],
+    ['filtra per stato con uguaglianza esatta', issues, { status: 'to-do' }, [1, 4]],
     ['filtra per priorità con uguaglianza esatta', issues, { priority: 'High' }, [1, 3]],
     [
       'combina ricerca, stato e priorità con operatore logico AND',
       issues,
-      { search: 'profilo', status: 'Open', priority: 'High' },
+      { search: 'profilo', status: 'to-do', priority: 'High' },
       [1],
     ],
     ['restituisce un array vuoto se nessuna issue coincide', issues, { search: 'inesistente' }, []],
-    ['gestisce in modo sicuro un elenco non valido', null, { status: 'Open' }, []],
+    ['gestisce in modo sicuro un elenco non valido', null, { status: 'to-do' }, []],
     ['considera assenti i filtri quando il secondo parametro è nullo', issues, null, [1, 2, 3, 4]],
     [
       'gestisce campi testuali mancanti nell\'oggetto issue',
-      [{ id: 5, status: 'Open', priority: 'Low' }],
+      [{ id: 5, status: 'to-do', priority: 'Low' }],
       { search: 'profilo' },
       [],
     ],
@@ -126,15 +126,15 @@ describe('validateCommentPayload', () => {
 
 describe('canUserTransitionStatus', () => {
   test.each([
-    ['consente Open -> In Progress a un utente ordinario', 'Open', 'In Progress', 'user', false, true],
-    ['consente Open -> Closed all\'autore', 'Open', 'Closed', 'user', true, true],
+    ['consente to-do -> In Progress a un utente ordinario', 'to-do', 'In Progress', 'user', false, true],
+    ['consente to-do -> Closed all\'autore', 'to-do', 'Closed', 'user', true, true],
     ['consente In Progress -> Resolved a un amministratore', 'In Progress', 'Resolved', 'admin', false, true],
     ['nega In Progress -> Closed a un utente non autore', 'In Progress', 'Closed', 'user', false, false],
     ['nega Closed -> In Progress anche a un amministratore', 'Closed', 'In Progress', 'admin', true, false],
-    ['nega Resolved -> Open all\'autore', 'Resolved', 'Open', 'user', true, false],
+    ['nega Resolved -> to-do all\'autore', 'Resolved', 'to-do', 'user', true, false],
     ['consente Closed -> Resolved all\'autore', 'Closed', 'Resolved', 'user', true, true],
-    ['nega una transizione verso uno stato sconosciuto', 'Open', 'Archived', 'admin', true, false],
-    ['nega una transizione da uno stato sconosciuto', 'Todo', 'Closed', 'admin', true, false],
+    ['nega una transizione verso uno stato sconosciuto', 'to-do', 'Archived', 'admin', true, false],
+    ['nega una transizione da uno stato sconosciuto', 'backlog', 'Closed', 'admin', true, false],
   ])('%s', (_label, currentStatus, nextStatus, userRole, isAuthor, expected) => {
     expect(canUserTransitionStatus(currentStatus, nextStatus, userRole, isAuthor)).toBe(expected);
   });
