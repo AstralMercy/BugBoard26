@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import CustomAlert from '../components/CustomAlert'; // Inserito solo l'import
 
@@ -66,7 +66,7 @@ const LoginPage = () => {
       {/* Navbar in stato non loggato */}
       <Navbar isLoggedIn={false} />
 
-      <main className="flex-grow flex flex-col items-center justify-center px-4 py-12">
+      <main className="grow flex flex-col items-center justify-center px-4 py-12">
         
         {/* Card di Login coordinata con l'ecosistema BugBoard26 */}
         <div className="w-full max-w-xl bg-[#2a2a2d] p-6 md:p-12 rounded-[2.5rem] shadow-2xl border border-gray-800">
@@ -123,16 +123,6 @@ const LoginPage = () => {
               Accedi
             </button>
           </form>
-
-          {/* Link di reindirizzamento alla registrazione */}
-          <div className="mt-8 text-center pt-6 border-t border-gray-800/60">
-            <p className="text-gray-500 text-sm font-medium">
-              Nuovo nel team? 
-              <Link to="/register" className="text-[#6495ED] font-bold hover:text-[#5a86d6] ml-2 transition-colors">
-                Crea un account
-              </Link>
-            </p>
-          </div>
 
         </div>
       </main>
