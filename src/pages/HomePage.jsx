@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import CustomAlert from '../components/CustomAlert';
@@ -44,7 +44,7 @@ const HomePage = () => {
   }, [token, navigate]);
 
   // Caricamento issue
-  const fetchIssues = async () => {
+  const fetchIssues = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
     try {
@@ -60,16 +60,13 @@ const HomePage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token, statusFilter, priorityFilter, sortBy]);
 
   useEffect(() => {
+    // Il caricamento remoto sincronizza la dashboard con i filtri selezionati.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchIssues();
-  }, [statusFilter, priorityFilter, sortBy]);
-
-  // Reset alla pagina 1 quando cambiano i filtri o la ricerca
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, priorityFilter, sortBy]);
+  }, [fetchIssues]);
 
   // --- SCALA VALORI PER ORDINAMENTO PRIORITÀ ---
   const priorityWeights = {
@@ -81,7 +78,7 @@ const HomePage = () => {
 
   // --- MAPPATURA COLORI DINAMICI ---
   const statusColors = {
-    'Open': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    'to-do': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
     'In Progress': 'bg-[#00c2cb]/10 text-[#00c2cb] border-[#00c2cb]/20',
     'Closed': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
   };
@@ -193,7 +190,7 @@ const HomePage = () => {
         // ---------------------------------------------
         
       }
-    } catch (error) {
+    } catch {
       triggerAlert("Errore durante l'aggiornamento dello stato.", 'error');
     }
   };
@@ -216,13 +213,13 @@ const HomePage = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        triggerAlert("Nuovo dipendente registrato con successo nel database aziendale!", 'success');
+        triggerAlert("Nuovo dipendente registrato con successo", 'success');
         setNewUser({ nome: '', cognome: '', username: '', email: '', password: '', role: 'normale' });
         setActiveTab('dashboard');
       } else {
         triggerAlert("Errore: " + data.message, 'error');
       }
-    } catch (error) {
+    } catch {
       triggerAlert("Errore di connessione durante la creazione utente.", 'error');
     }
   };
@@ -290,7 +287,10 @@ const HomePage = () => {
                     <input 
                       type="text"
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       placeholder="Cerca bug per titolo o descrizione..." 
                       className="w-full pl-12 pr-4 py-4 bg-[#2a2a2d] border border-gray-800 rounded-2xl text-white font-medium focus:outline-none focus:border-[#00c2cb] placeholder-gray-500 transition-colors shadow-lg"
                     />
@@ -303,11 +303,14 @@ const HomePage = () => {
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Filtra per Stato</label>
                     <select 
                       value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="w-full p-3 bg-[#1a1a1c] border border-gray-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#00c2cb] cursor-pointer"
                     >
                       <option value="All">Tutti gli stati</option>
-                      <option value="Open">Todo / Open</option>
+                      <option value="to-do">to-do</option>
                       <option value="In Progress">In Progress</option>
                       <option value="Closed">Closed</option>
                     </select>
@@ -317,7 +320,10 @@ const HomePage = () => {
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Filtra per Priorità</label>
                     <select 
                       value={priorityFilter}
-                      onChange={(e) => setPriorityFilter(e.target.value)}
+                      onChange={(e) => {
+                        setPriorityFilter(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="w-full p-3 bg-[#1a1a1c] border border-gray-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#00c2cb] cursor-pointer"
                     >
                       <option value="All">Tutte le priorità</option>
@@ -332,7 +338,10 @@ const HomePage = () => {
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Ordina per</label>
                     <select 
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
+                      onChange={(e) => {
+                        setSortBy(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="w-full p-3 bg-[#1a1a1c] border border-gray-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#00c2cb] cursor-pointer"
                     >
                       <option value="id">ID Progressivo</option>
@@ -344,7 +353,7 @@ const HomePage = () => {
 
                 {/* TABELLA ISSUE */}
                 <div className="bg-[#2a2a2d] rounded-[2.5rem] border border-gray-800 shadow-2xl overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-[600px]">
+                  <table className="w-full text-left border-collapse min-w-150">
                     <thead>
                       <tr className="bg-[#323235] border-b border-gray-800">
                         <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">ID</th>
@@ -361,7 +370,7 @@ const HomePage = () => {
                           <tr 
                             key={issue.id} 
                             onClick={() => handleIssueClick(issue)}
-                            className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                            className="hover:bg-white/2 transition-colors group cursor-pointer"
                           >
                             <td className="px-8 py-6 font-mono text-[#00c2cb] font-bold whitespace-nowrap">ISS-{issue.id}</td>
                             
@@ -508,7 +517,7 @@ const HomePage = () => {
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Cambia Stato</label>
                       <select value={selectedIssue.status} onChange={(e) => handleStatusChange(e.target.value)} className="p-3 bg-[#1a1a1c] border border-gray-700 rounded-xl text-white font-bold text-xs uppercase focus:outline-none focus:border-[#00c2cb]">
-                        <option value="Open">Todo / Open</option>
+                        <option value="to-do">to-do</option>
                         <option value="In Progress">In Progress</option>
                         <option value="Closed">Closed</option>
                       </select>
