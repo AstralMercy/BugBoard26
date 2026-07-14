@@ -7,7 +7,7 @@ const CustomAlert = ({ isOpen, message, type = 'success', onClose }) => {
   const themeColor = isSuccess ? '#00c2cb' : '#ef4444';
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#1a1a1c]/80 backdrop-blur-md transition-all duration-200">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-[#1a1a1c]/80 backdrop-blur-md transition-all duration-200">
       
       {/* CORPO DEL POPUP PULITO SENZA HEADER ROW */}
       <div className="bg-[#2a2a2d] border-2 border-gray-800 rounded-[2.5rem] p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.6)] relative overflow-hidden">
