@@ -100,7 +100,7 @@ const CreateIssuePage = () => {
           {/* INTESTAZIONE */}
           <div className="mb-10">
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">New Issue</h1>
-            <p className="text-gray-500 mt-2 font-medium">Inserisci un nuovo bug report completo di allegati grafici</p>
+            <p className="text-gray-500 mt-2 font-medium">Inserisci i dettagli della issue</p>
           </div>
 
           {/* SCHEDA DEL FORM COMPLETO */}
