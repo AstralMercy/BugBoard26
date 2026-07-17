@@ -3,6 +3,149 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import CustomAlert from '../components/CustomAlert'; // Inserito solo l'import
 
+const ALLOWED_ROLES = new Set(['normale', 'admin']);
+const DISPLAY_NAME_PATTERN = /^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u;
+const USERNAME_PATTERN = /^[\p{L}\p{M}\p{N}._-]+$/u;
+const JWT_PATTERN = /^([A-Za-z0-9_-]{1,512})\.([A-Za-z0-9_-]{1,2048})\.([A-Za-z0-9_-]{43})$/;
+const MAX_NAME_LENGTH = 100;
+const MAX_USERNAME_LENGTH = 64;
+const MAX_TOKEN_LIFETIME_SECONDS = (2 * 60 * 60) + 60;
+
+class InvalidLoginResponseError extends Error {
+  constructor() {
+    super('La risposta di autenticazione non è valida.');
+    this.name = 'InvalidLoginResponseError';
+  }
+}
+
+const isRecord = (value) => (
+  value !== null
+  && typeof value === 'object'
+  && !Array.isArray(value)
+);
+
+const sanitizeText = (value, pattern, maxLength) => {
+  if (typeof value !== 'string') {
+    throw new InvalidLoginResponseError();
+  }
+
+  const sanitizedValue = value.normalize('NFKC').trim();
+  if (
+    sanitizedValue.length === 0
+    || sanitizedValue.length > maxLength
+    || !pattern.test(sanitizedValue)
+  ) {
+    throw new InvalidLoginResponseError();
+  }
+
+  return sanitizedValue;
+};
+
+const sanitizeRole = (value) => {
+  if (!ALLOWED_ROLES.has(value)) {
+    throw new InvalidLoginResponseError();
+  }
+
+  // Restituisce esclusivamente valori definiti localmente, non la stringa remota.
+  return value === 'admin' ? 'admin' : 'normale';
+};
+
+const decodeJwtSegment = (segment) => {
+  try {
+    const base64 = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+    const binary = atob(base64 + padding);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    const value = JSON.parse(decoded);
+
+    if (!isRecord(value)) {
+      throw new InvalidLoginResponseError();
+    }
+
+    return value;
+  } catch {
+    throw new InvalidLoginResponseError();
+  }
+};
+
+const sanitizeUser = (value) => {
+  if (!isRecord(value)) {
+    throw new InvalidLoginResponseError();
+  }
+
+  return {
+    nome: sanitizeText(value.nome, DISPLAY_NAME_PATTERN, MAX_NAME_LENGTH),
+    cognome: sanitizeText(value.cognome, DISPLAY_NAME_PATTERN, MAX_NAME_LENGTH),
+    username: sanitizeText(value.username, USERNAME_PATTERN, MAX_USERNAME_LENGTH),
+    role: sanitizeRole(value.role),
+  };
+};
+
+const sanitizeToken = (value, user) => {
+  if (typeof value !== 'string') {
+    throw new InvalidLoginResponseError();
+  }
+
+  const sanitizedToken = value.trim();
+  const match = JWT_PATTERN.exec(sanitizedToken);
+  if (!match) {
+    throw new InvalidLoginResponseError();
+  }
+
+  const header = decodeJwtSegment(match[1]);
+  const payload = decodeJwtSegment(match[2]);
+  const now = Math.floor(Date.now() / 1000);
+  const payloadUsername = sanitizeText(payload.username, USERNAME_PATTERN, MAX_USERNAME_LENGTH);
+  const payloadRole = sanitizeRole(payload.role);
+
+  if (
+    header.alg !== 'HS256'
+    || header.typ !== 'JWT'
+    || !Number.isSafeInteger(payload.id)
+    || payload.id <= 0
+    || !Number.isSafeInteger(payload.iat)
+    || !Number.isSafeInteger(payload.exp)
+    || payload.iat > now + 60
+    || payload.exp <= now
+    || payload.exp <= payload.iat
+    || payload.exp - payload.iat > MAX_TOKEN_LIFETIME_SECONDS
+    || payloadUsername !== user.username
+    || payloadRole !== user.role
+  ) {
+    throw new InvalidLoginResponseError();
+  }
+
+  return sanitizedToken;
+};
+
+const sanitizeLoginResponse = (value) => {
+  if (!isRecord(value)) {
+    throw new InvalidLoginResponseError();
+  }
+
+  const user = sanitizeUser(value.user);
+  return {
+    token: sanitizeToken(value.token, user),
+    user,
+  };
+};
+
+const persistValidatedSession = ({ token, user }) => {
+  const serializedUser = JSON.stringify(user);
+
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', serializedUser);
+  } catch (error) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    throw error;
+  }
+};
+
 const LoginPage = () => {
   // --- LOGICA JAVASCRIPT ---
   const [formData, setFormData] = useState({
@@ -40,23 +183,31 @@ const LoginPage = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        // Salviamo il Token JWT e le info utente nella memoria del browser
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.toLowerCase().includes('application/json')) {
+          throw new InvalidLoginResponseError();
+        }
+
+        const data = await response.json();
+        const validatedSession = sanitizeLoginResponse(data);
+        persistValidatedSession(validatedSession);
         
         // Entra direttamente senza mostrare il popup di successo
         navigate('/home'); 
       } else {
-        // Mostra il popup personalizzato in caso di errore di credenziali
-        triggerAlert("Errore di autenticazione: " + data.message, 'error');
+        // Il testo remoto non viene mostrato né memorizzato senza validazione.
+        const message = response.status === 401
+          ? 'Errore di autenticazione: credenziali errate.'
+          : 'Impossibile completare l’autenticazione.';
+        triggerAlert(message, 'error');
       }
     } catch (error) {
-      console.error("Errore connessione server:", error);
-      // Mostra il popup personalizzato in caso di errore di rete
-      triggerAlert("Impossibile connettersi al backend. Assicurati che Express sia acceso sulla porta 5000.", 'error');
+      console.error('Errore durante il login:', error);
+      const message = error instanceof InvalidLoginResponseError
+        ? 'Il server ha restituito dati di autenticazione non validi. Accesso annullato.'
+        : 'Impossibile connettersi al backend. Assicurati che Express sia acceso sulla porta 5000.';
+      triggerAlert(message, 'error');
     }
   };
 
