@@ -8,9 +8,25 @@ import issueRoutes from './routes/issueRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+const configuredOrigins = process.env.CORS_ALLOWED_ORIGINS
+  ?.split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set(
+  configuredOrigins?.length ? configuredOrigins : DEFAULT_ALLOWED_ORIGINS
+);
 
 // Configurazione dei middleware di comunicazione di base
-app.use(cors());
+app.disable('x-powered-by');
+app.use(cors({
+  origin(origin, callback) {
+    callback(null, !origin || allowedOrigins.has(origin));
+  },
+}));
 app.use(express.json());
 
 // Rende la cartella degli upload accessibile tramite link URL dal frontend
