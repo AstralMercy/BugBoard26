@@ -8,16 +8,33 @@ import { CLOUDINARY_CONFIG } from '../config/env.js';
 const router = express.Router();
 const INITIAL_ISSUE_STATUS = 'to-do';
 const ALLOWED_ISSUE_STATUSES = new Set(['to-do', 'In Progress', 'Closed', 'Resolved']);
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
 
 // Configurazione di Cloudinary tramite le credenziali del file .env
 cloudinary.config(CLOUDINARY_CONFIG);
 
 // Usiamo la memoria RAM (memoryStorage) anziché il disco locale per i file temporanei
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: MAX_UPLOAD_SIZE,
+    files: 1,
+  },
+});
+const uploadImage = (req, res, next) => {
+  upload.single('image')(req, res, (error) => {
+    if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ message: 'Immagine troppo grande. Dimensione massima consentita: 5 MB.' });
+    }
+
+    if (error) return next(error);
+    return next();
+  });
+};
 
 // 1. POST /api/issues -> Segnalazione nuova issue con caricamento su Cloudinary (Punto 2)
-router.post('/', verifyToken, upload.single('image'), async (req, res) => {
+router.post('/', verifyToken, uploadImage, async (req, res) => {
   const { title, description, type, priority } = req.body;
 
   if (!title || !description || !type || !priority) {
