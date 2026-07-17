@@ -71,7 +71,7 @@ const CreateIssuePage = () => {
       });
 
       if (response.ok) {
-        triggerAlert("Bug segnalato e salvato correttamente", 'success'); // Sostituito alert
+        triggerAlert("Issue segnalata e salvata correttamente", 'success'); // Sostituito alert
         setTimeout(() => navigate('/home'), 1500); // Ritorniamo alla dashboard con un piccolo delay per far vedere il popup
       } else {
         const errorData = await response.json();
