@@ -128,11 +128,11 @@ describe('canUserTransitionStatus', () => {
   test.each([
     ['consente to-do -> In Progress a un utente ordinario', 'to-do', 'In Progress', 'user', false, true],
     ['consente to-do -> Closed all\'autore', 'to-do', 'Closed', 'user', true, true],
-    ['consente In Progress -> Resolved a un amministratore', 'In Progress', 'Resolved', 'admin', false, true],
+    ['consente In Progress -> Closed a un amministratore', 'In Progress', 'Closed', 'admin', false, true],
     ['nega In Progress -> Closed a un utente non autore', 'In Progress', 'Closed', 'user', false, false],
     ['nega Closed -> In Progress anche a un amministratore', 'Closed', 'In Progress', 'admin', true, false],
-    ['nega Resolved -> to-do all\'autore', 'Resolved', 'to-do', 'user', true, false],
-    ['consente Closed -> Resolved all\'autore', 'Closed', 'Resolved', 'user', true, true],
+    ['nega Closed -> to-do all\'autore', 'Closed', 'to-do', 'user', true, false],
+    ['consente to-do -> Closed a un amministratore', 'to-do', 'Closed', 'admin', false, true],
     ['nega una transizione verso uno stato sconosciuto', 'to-do', 'Archived', 'admin', true, false],
     ['nega una transizione da uno stato sconosciuto', 'backlog', 'Closed', 'admin', true, false],
   ])('%s', (_label, currentStatus, nextStatus, userRole, isAuthor, expected) => {

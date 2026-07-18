@@ -7,7 +7,7 @@ import { CLOUDINARY_CONFIG } from '../config/env.js';
 
 const router = express.Router();
 const INITIAL_ISSUE_STATUS = 'to-do';
-const ALLOWED_ISSUE_STATUSES = new Set(['to-do', 'In Progress', 'Closed', 'Resolved']);
+const ALLOWED_ISSUE_STATUSES = new Set(['to-do', 'In Progress', 'Closed']);
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
 
 // Configurazione di Cloudinary tramite le credenziali del file .env

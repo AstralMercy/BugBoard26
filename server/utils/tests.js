@@ -1,12 +1,11 @@
 const ISSUE_TYPES = new Set(['bug', 'feature']);
 const ISSUE_PRIORITIES = new Set(['Low', 'Medium', 'High', 'Critical']);
-const TERMINAL_STATUSES = new Set(['Closed', 'Resolved']);
+const TERMINAL_STATUSES = new Set(['Closed']);
 
 const STATUS_TRANSITIONS = new Map([
-  ['to-do', new Set(['In Progress', 'Closed', 'Resolved'])],
-  ['In Progress', new Set(['Closed', 'Resolved'])],
-  ['Closed', new Set(['Resolved'])],
-  ['Resolved', new Set()],
+  ['to-do', new Set(['In Progress', 'Closed'])],
+  ['In Progress', new Set(['Closed'])],
+  ['Closed', new Set()],
 ]);
 
 /**
@@ -110,7 +109,7 @@ export function validateCommentPayload(text, issueId) {
 
 /**
  * Verifica una transizione di stato e l'autorizzazione richiesta per gli stati
- * terminali. Le transizioni verso Closed o Resolved sono riservate all'autore
+ * terminali. Le transizioni verso Closed sono riservate all'autore
  * della issue o a un amministratore.
  *
  * @param {string} currentStatus stato corrente
